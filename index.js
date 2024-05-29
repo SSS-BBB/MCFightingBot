@@ -38,8 +38,13 @@ controlBot.on("chat", async (username, message) => {
     if (message.split(" ")[0].toLowerCase() === "observe") {
         let id = parseInt(message.split(" ")[1])
         if (id) {
+            // Get Bot
+            const botClass = getBotFromID(id)
+            if (!botClass) {
+                return
+            }
             controlBot.chat("Observation of " + id)
-            obs = getObservations(id)
+            obs = botClass.getObservations()
             if (obs) {
                 obs.forEach(e => {
                     controlBot.chat(String(e))
@@ -78,7 +83,27 @@ controlBot.on("chat", async (username, message) => {
     }
 
     if (message.toLowerCase() === "all act") {
-        
+
+        const maxSteps = 500
+        for (let step = 0; step < maxSteps; step++) {
+            allBots.forEach(async (botClass) => {
+                // Random action
+                const randAction = Math.floor(Math.random() * 8)
+                botClass.botAction(randAction)
+            })
+            await controlBot.waitForTicks(1)
+        }
+
+        // Only keep the random
+        const randKeep = allBots[Math.floor(Math.random() * allBots.length)]
+        allBots.forEach((botClass) => {
+            if ((botClass.id) !== randKeep.id) {
+                botClass.bot.quit()
+            }
+        })
+        allBots = allBots.filter((botClass) => botClass.id === randKeep.id)
+        console.log(allBots)
+        console.log(allBots[0].survivalTime)
     }
 })
 
@@ -86,14 +111,18 @@ function createBots(amount) {
     for (let i = 0; i < amount; i++) {
 
         // Create new bot
-        const botName = `ID_${id}`
-        const botClass = new MCBot(botName, PORT)
+        const botClass = new MCBot(id, PORT)
         
         // Add bot to list
         allBots.push(botClass)
 
+        // Remove when bot is dead
+        botClass.bot.once("respawn", () => {
+            removeBotByID(botClass.id)
+        })
+
         // Control bot chat
-        controlBot.chat(botName + " Created.")
+        controlBot.chat(String(id) + " Created.")
 
         id++
     }
@@ -129,7 +158,7 @@ function removeAllBots() {
 }
 
 function removeBotByID(id) {
-    // console.log(`Before remove: ${allBots}`)
+    console.log(`Before remove: ${allBots}`)
 
     const botName = `ID_${id}`
     const botClass = getBotFromID(id)
@@ -139,7 +168,7 @@ function removeBotByID(id) {
         controlBot.chat(`${botName} has been removed.`)
     }
 
-    // console.log(`After remove: ${allBots}`)
+    console.log(`After remove: ${allBots}`)
 }
 
 async function randomAction(id) {
