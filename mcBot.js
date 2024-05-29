@@ -10,6 +10,20 @@ exports.MCBot = class {
 
         this.name = name
         this.port = port
+
+        this.bot.once("spawn", this.setBotToArena.bind(this))
+    }
+
+    setBotToArena() {
+        const minX = -209
+        const maxX = -204
+        const minZ = 177
+        const maxZ = 182
+
+        const randX = minX + Math.floor(Math.random() * (maxX - minX + 1))
+        const randZ = minZ + Math.floor(Math.random() * (maxZ - minZ + 1))
+        // console.log(this.bot)
+        this.bot.chat(`/tp ${this.name} ${randX} -60 ${randZ}`)
     }
 
     getObservations() {

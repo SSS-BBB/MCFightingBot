@@ -1,7 +1,7 @@
 const mineflayer = require("mineflayer")
 const { MCBot } = require("./mcBot")
 
-const PORT = 61126
+const PORT = 55296
 
 let id = 1
 let allBots = []
@@ -75,6 +75,10 @@ controlBot.on("chat", async (username, message) => {
         if (botClass) {
             controlBot.chat(`/tp ${botClass.name} -207 -60 180`)
         }
+    }
+
+    if (message.toLowerCase() === "all act") {
+        
     }
 })
 
@@ -150,11 +154,19 @@ async function randomAction(id) {
     await botClass.botAction(randAction)
 }
 
-function setBotToArena(id) {
+function setBotToArenaById(id) {
     const botClass = getBotFromID(id)
-    if (botClass) {
-        const randX = -210 + Math.floor(Math.random() * (-203 + 210 + 1))
-        const randZ = -210 + Math.floor(Math.random() * (-203 + 210 + 1))
-        controlBot.chat(`/tp ${botClass.name} -207 -60 180`)
+    if (!botClass) {
+        return
     }
+
+    const randX = -210 + Math.floor(Math.random() * (-203 + 210 + 1))
+    const randZ = 176 + Math.floor(Math.random() * (183 - 176 + 1))
+    controlBot.chat(`/tp ${botClass.name} ${randX} -60 ${randZ}`)
+}
+
+function setBotToArenaByClass(botClass) {
+    const randX = -210 + Math.floor(Math.random() * (-203 + 210 + 1))
+    const randZ = 176 + Math.floor(Math.random() * (183 - 176 + 1))
+    controlBot.chat(`/tp ${botClass.name} ${randX} -60 ${randZ}`)
 }
