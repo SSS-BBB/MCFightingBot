@@ -1,9 +1,9 @@
 const mineflayer = require("mineflayer")
 
 exports.MCBot = class {
-    constructor(id, port) {
+    constructor(id, gen, port) {
         this.id = id
-        this.name = `ID_${id}`
+        this.name = `GEN_${gen}_ID_${id}`
 
         this.bot = mineflayer.createBot({
             host: "localhost",
@@ -14,6 +14,7 @@ exports.MCBot = class {
         this.port = port
         this.survivalTime = 0
         this.bot.health = 20
+        this.botReady = false
 
         this.bot.once("spawn", this.setBotToArena.bind(this))
     }
@@ -28,6 +29,8 @@ exports.MCBot = class {
         const randZ = minZ + Math.floor(Math.random() * (maxZ - minZ + 1))
         // console.log(this.bot)
         this.bot.chat(`/tp ${this.name} ${randX} -60 ${randZ}`)
+
+        this.botReady = true
 
         // Count survival time
         setInterval(() => {

@@ -82,36 +82,49 @@ controlBot.on("chat", async (username, message) => {
         }
     }
 
-    if (message.toLowerCase() === "all act") {
+    if (message.toLowerCase() === "start random") {
 
+        const lastGen = 5
+        const population = 5
         const maxSteps = 500
-        for (let step = 0; step < maxSteps; step++) {
-            allBots.forEach(async (botClass) => {
-                // Random action
-                const randAction = Math.floor(Math.random() * 8)
-                botClass.botAction(randAction)
-            })
-            await controlBot.waitForTicks(1)
-        }
 
-        // Only keep the random
-        const randKeep = allBots[Math.floor(Math.random() * allBots.length)]
-        allBots.forEach((botClass) => {
-            if ((botClass.id) !== randKeep.id) {
-                botClass.bot.quit()
+        for (let gen = 1; gen <= lastGen; gen++) {
+            removeAllBots()
+            createBots(population, gen)
+
+            while (countReady() < population) {
+                await controlBot.waitForTicks(1)
             }
-        })
-        allBots = allBots.filter((botClass) => botClass.id === randKeep.id)
-        console.log(allBots)
-        console.log(allBots[0].survivalTime)
+
+            for (let step = 0; step < maxSteps; step++) {
+                allBots.forEach(async (botClass) => {
+                    // Random action
+                    const randAction = Math.floor(Math.random() * 8)
+                    botClass.botAction(randAction)
+                })
+                await controlBot.waitForTicks(1)
+            }
+
+            // Only keep the random
+            const randKeep = allBots[Math.floor(Math.random() * allBots.length)]
+            allBots.forEach((botClass) => {
+                if ((botClass.id) !== randKeep.id) {
+                    botClass.bot.quit()
+                }
+            })
+            allBots = allBots.filter((botClass) => botClass.id === randKeep.id)
+            console.log(allBots[0].name)
+        }
+        
     }
 })
 
-function createBots(amount) {
+function createBots(amount, gen) {
+    id = 1
     for (let i = 0; i < amount; i++) {
 
         // Create new bot
-        const botClass = new MCBot(id, PORT)
+        const botClass = new MCBot(id, gen, PORT)
         
         // Add bot to list
         allBots.push(botClass)
@@ -122,7 +135,7 @@ function createBots(amount) {
         })
 
         // Control bot chat
-        controlBot.chat(String(id) + " Created.")
+        controlBot.chat(botClass.name + " Created.")
 
         id++
     }
@@ -130,8 +143,7 @@ function createBots(amount) {
 
 function getBotFromID(id) {
     // Get Bot
-    const botName = `ID_${id}`
-    const botClass = allBots.find( (b) => b.name === botName )
+    const botClass = allBots.find( (b) => b.id === id )
 
     if (!botClass) {
         controlBot.chat(`${botName} not found.`)
@@ -160,12 +172,11 @@ function removeAllBots() {
 function removeBotByID(id) {
     console.log(`Before remove: ${allBots}`)
 
-    const botName = `ID_${id}`
     const botClass = getBotFromID(id)
     if (botClass) {
         botClass.bot.quit()
-        allBots = allBots.filter( (b) => b.name !== botName )
-        controlBot.chat(`${botName} has been removed.`)
+        allBots = allBots.filter( (b) => b.id !== id )
+        controlBot.chat(`${botClass.name} has been removed.`)
     }
 
     console.log(`After remove: ${allBots}`)
@@ -198,4 +209,8 @@ function setBotToArenaByClass(botClass) {
     const randX = -210 + Math.floor(Math.random() * (-203 + 210 + 1))
     const randZ = 176 + Math.floor(Math.random() * (183 - 176 + 1))
     controlBot.chat(`/tp ${botClass.name} ${randX} -60 ${randZ}`)
+}
+
+function countReady() {
+    return allBots.filter((botClass) => botClass.botReady).length
 }
