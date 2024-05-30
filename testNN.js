@@ -22,21 +22,20 @@ console.log("=====Old brain=====")
 let test1 = new NNTest(brain)
 test1.forward(values1)
 test1.forward(values2)
+console.log()
+console.log()
 
 // New brain
 console.log("=====New brain=====")
 let brain1 = test1.brain
 let newBrain = NN.mutate(brain1, 0.5)
 let test2 = new NNTest(newBrain)
-test2.forward(values1)
-test2.forward(values2)
+test2.forward([1, 10, 100, 8, 9])
+test2.forward([1, 2, 3, 6, 9])
+console.log()
+console.log()
 
 // Old brain
 console.log("=====Old brain=====")
 test1.forward(values1)
 test1.forward(values2)
-
-// New brain
-console.log("=====New brain=====")
-test2.forward(values1)
-test2.forward(values2)

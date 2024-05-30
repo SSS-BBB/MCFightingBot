@@ -136,7 +136,9 @@ controlBot.on("chat", async (username, message) => {
 
         for (let gen = 1; gen <= lastGen; gen++) {
             removeAllBots()
-            createBots(population, gen)
+            if (gen === 1) {
+                
+            }
 
             while (countReady() < population) {
                 await controlBot.waitForTicks(1)
@@ -205,7 +207,7 @@ function createBots(amount, gen) {
     }
 }
 
-function createMutateBots(amount, gen, brain) {
+function createMutateBots(amount, gen, brain, mutationRate) {
     id = 1
     
     let unique = generateUnique(5)
@@ -228,7 +230,7 @@ function createMutateBots(amount, gen, brain) {
         let newBrain
         if (brain !== null) {
             if (i !== 0) {
-                newBrain = NN.mutate(brain, 0.2)
+                newBrain = NN.mutate(brain, mutationRate)
             }
             else {
                 newBrain = brain

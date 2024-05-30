@@ -32,6 +32,7 @@ class NerualNode {
     }
 
     static nodeConnect(neuralNode, i) {
+        // console.log(neuralNode.value)
         return neuralNode.value * neuralNode.weights[i]
     }
 
@@ -72,19 +73,20 @@ class NerualLayer {
         }
     }
 
-    static acceptInput(layerList) {
-        if (layerList.prevLayer === null) {
+    static acceptInput(layerList, prevLayer) {
+        if (prevLayer === null) {
             console.log("Cannot accept input in this layer.")
             return
         }
 
         for (let i = 0; i < layerList.nodeList.length; i++) {
             let nodeSum = 0
-            layerList.prevLayer.nodeList.forEach(prevNode => {
+            prevLayer.nodeList.forEach(prevNode => {
                 nodeSum += NerualNode.nodeConnect(prevNode, i)
             })
             // layerList.nodeList[i].setNodeValue(nodeSum, NeuralActivation.relu)
             NerualNode.setNodeValue(layerList.nodeList[i], nodeSum, NeuralActivation.relu)
+            // console.log(layerList.nodeList[i])
         }
     }
 
@@ -136,15 +138,17 @@ exports.NN = class {
         for (let i = 1; i < brain.neuralLayerList.length; i++) {
             // console.log(`=====Layer${i + 1}=====`)
             // console.log("Before forward:")
-            // console.log(`Prev Layer: ${this.getNodeValuesByLayerIndex(i - 1)}`)
-            // console.log(`Current Layer: ${this.getNodeValuesByLayerIndex(i)}`)
+            // console.log(`Prev Layer: ${brain.neuralLayerList[i - 1].nodeList.map((n) => n.value)}`)
+            // console.log(`Current Layer: ${brain.neuralLayerList[i].nodeList.map((n) => n.value)}`)
 
             // brain.neuralLayerList[i].acceptInput()
-            NerualLayer.acceptInput(brain.neuralLayerList[i])
+            NerualLayer.acceptInput(brain.neuralLayerList[i], brain.neuralLayerList[i - 1])
+
+            // console.log(brain.neuralLayerList[i].prevLayer)
 
             // console.log("After forward:")
-            // console.log(`Prev Layer: ${this.getNodeValuesByLayerIndex(i - 1)}`)
-            // console.log(`Current Layer: ${this.getNodeValuesByLayerIndex(i)}`)
+            // console.log(`Prev Layer: ${brain.neuralLayerList[i - 1].nodeList.map((n) => n.value)}`)
+            // console.log(`Current Layer: ${brain.neuralLayerList[i].nodeList.map((n) => n.value)}`)
         }
 
         // return getNodeValuesByLayerIndex(brain, brain.neuralLayerList.length - 1)
@@ -163,7 +167,9 @@ exports.NN = class {
         // copy value of the old brain
         // const newBrain = Object.assign(Object.create(Object.getPrototypeOf(brain)), brain)
         // const newBrain = Object.assign(Object.create(Object.getPrototypeOf(brain)), brain)
-        const newBrain = JSON.parse(JSON.stringify(brain))
+        // console.log(brain.neuralLayerList[1].prevLayer)
+        let newBrain = JSON.parse(JSON.stringify(brain))
+        // console.log(newBrain.neuralLayerList[1].prevLayer)
 
         for (let i = 0; i < newBrain.neuralLayerList.length; i++) {
             // newBrain.neuralLayerList[i].layerMutate(mutationRate)
