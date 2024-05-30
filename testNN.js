@@ -27,11 +27,11 @@ console.log()
 
 // New brain
 console.log("=====New brain=====")
-let brain1 = test1.brain
-let newBrain = NN.mutate(brain1, 0.5)
+let brain1 = JSON.parse(JSON.stringify(test1.brain))
+let newBrain = NN.mutate(brain1, 0)
 let test2 = new NNTest(newBrain)
-test2.forward([1, 10, 100, 8, 9])
-test2.forward([1, 2, 3, 6, 9])
+test2.forward(values1)
+test2.forward(values2)
 console.log()
 console.log()
 

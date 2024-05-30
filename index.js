@@ -134,10 +134,16 @@ controlBot.on("chat", async (username, message) => {
         const population = 5
         const maxSteps = 500
 
+        const evoTime = new Date().getTime()
+
+        let bestBrain = null
         for (let gen = 1; gen <= lastGen; gen++) {
             removeAllBots()
             if (gen === 1) {
-                
+                createMutateBots(population, gen, null, 0)
+            }
+            else {
+                createMutateBots(population, gen, bestBrain, 0.2)
             }
 
             while (countReady() < population) {
@@ -165,8 +171,44 @@ controlBot.on("chat", async (username, message) => {
             })
             allBots = allBots.filter((botClass) => botClass.id === randKeep.id)
             console.log(allBots[0].name)
+            bestBrain = allBots[0].brain
+
+            // Save brain
+            try {
+                const brainDir = `./models/${evoTime}/${gen}`
+                if (!fs.existsSync(brainDir)) {
+                    fs.mkdirSync(brainDir, { recursive: true })
+                }
+
+                fs.writeFileSync(`${brainDir}/${allBots[0].name}.json`, JSON.stringify(bestBrain))
+            }
+            catch(error) {
+                controlBot.chat("Cannot save model.")
+                console.log(error)
+            }
+        }
     }
- }
+
+    if (message.toLowerCase() === "load") {
+        controlBot.chat("Loading Bot...")
+        // load bot
+        const brainDir = "models/1717073829626"
+        loadBot(`${brainDir}/1/GEN1ID2_w6wqk.json`, 2, 1)
+        loadBot(`${brainDir}/5/GEN5ID4_EzuYf.json`, 4, 5)
+
+        const maxSteps = 500
+
+        while (countReady() < 2) {
+            await controlBot.waitForTicks(1)
+        }
+
+        for (let step = 0; step < maxSteps; step++) {
+            allBots.forEach(async (botClass) => {
+                botClass.brainAction()
+            })
+            await controlBot.waitForTicks(1)
+        }
+    }
 
 })
 
@@ -183,7 +225,7 @@ function createBots(amount, gen) {
     try {
         fs.writeFileSync(UNIQUE_PATH, JSON.stringify(uniqueList))
     } catch (error) {
-        
+        console.log(error)
     }
 
     const layerSizeList = [7, 5, 3, 2, 8]
@@ -204,6 +246,39 @@ function createBots(amount, gen) {
         controlBot.chat(botClass.name + " Created.")
 
         id++
+    }
+}
+
+function loadBot(brainPath, id, gen) {
+    let unique = generateUnique(5)
+    // console.log(uniqueList)
+    while (uniqueList.includes(unique)) {
+        unique = generateUnique(5)
+    }
+    uniqueList.push(unique)
+
+    try {
+        fs.writeFileSync(UNIQUE_PATH, JSON.stringify(uniqueList))
+    } catch (error) {
+        console.log(error)
+    }
+
+    let brain
+    try {
+        if (fs.existsSync(brainPath)) {
+            brain = JSON.parse(fs.readFileSync(brainPath, "utf-8"))
+        }
+    }
+    catch (error) {
+        console.log(error)
+    }
+
+    if (brain) {
+        const botClass = new MCBot(id, gen, unique, PORT, brain, 0)
+        allBots.push(botClass)
+    }
+    else {
+        controlBot.chat(`Cannot load brain from ${brainPath}.`)
     }
 }
 
@@ -233,7 +308,7 @@ function createMutateBots(amount, gen, brain, mutationRate) {
                 newBrain = NN.mutate(brain, mutationRate)
             }
             else {
-                newBrain = brain
+                newBrain = NN.mutate(brain, 0)
             }
             
         }
