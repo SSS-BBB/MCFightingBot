@@ -169,23 +169,27 @@ controlBot.on("chat", async (username, message) => {
                     botClass.bot.quit()
                 }
             })
-            allBots = allBots.filter((botClass) => botClass.id === randKeep.id)
-            console.log(allBots[0].name)
-            bestBrain = allBots[0].brain
 
-            // Save brain
-            try {
-                const brainDir = `./models/${evoTime}/${gen}`
-                if (!fs.existsSync(brainDir)) {
-                    fs.mkdirSync(brainDir, { recursive: true })
+            if (allBots.length > 0) {
+                allBots = allBots.filter((botClass) => botClass.id === randKeep.id)
+                console.log(allBots[0].name)
+                bestBrain = allBots[0].brain
+
+                // Save brain
+                try {
+                    const brainDir = `./models/${evoTime}/${gen}`
+                    if (!fs.existsSync(brainDir)) {
+                        fs.mkdirSync(brainDir, { recursive: true })
+                    }
+
+                    fs.writeFileSync(`${brainDir}/${allBots[0].name}.json`, JSON.stringify(bestBrain))
                 }
-
-                fs.writeFileSync(`${brainDir}/${allBots[0].name}.json`, JSON.stringify(bestBrain))
+                catch(error) {
+                    controlBot.chat("Cannot save model.")
+                    console.log(error)
+                }
             }
-            catch(error) {
-                controlBot.chat("Cannot save model.")
-                console.log(error)
-            }
+            
         }
     }
 
