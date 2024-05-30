@@ -130,7 +130,7 @@ controlBot.on("chat", async (username, message) => {
     }
 
     if (message.toLowerCase() === "start evo") {
-        const lastGen = 5
+        const lastGen = 10
         const population = 5
         const maxSteps = 500
 
@@ -192,9 +192,10 @@ controlBot.on("chat", async (username, message) => {
     if (message.toLowerCase() === "load") {
         controlBot.chat("Loading Bot...")
         // load bot
-        const brainDir = "models/1717073829626"
-        loadBot(`${brainDir}/1/GEN1ID2_w6wqk.json`, 2, 1)
-        loadBot(`${brainDir}/5/GEN5ID4_EzuYf.json`, 4, 5)
+        const brainDir = "models/1717075366470"
+        removeAllBots()
+        loadBot(`${brainDir}/1/GEN1ID4_GAEPY.json`, 4, 1)
+        loadBot(`${brainDir}/5/GEN5ID3_OHdwW.json`, 3, 5)
 
         const maxSteps = 500
 
@@ -276,6 +277,11 @@ function loadBot(brainPath, id, gen) {
     if (brain) {
         const botClass = new MCBot(id, gen, unique, PORT, brain, 0)
         allBots.push(botClass)
+
+        // Remove when bot is dead
+        botClass.bot.once("respawn", () => {
+            removeBotByID(botClass.id)
+        })
     }
     else {
         controlBot.chat(`Cannot load brain from ${brainPath}.`)

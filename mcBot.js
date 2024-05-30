@@ -54,6 +54,20 @@ exports.MCBot = class {
         e.type === "hostile" )
 
         // [ myPos, otherPos, myHealth ]
+        if (nearestEntity === null) {
+            return [
+                this.bot.entity.position.x,
+                this.bot.entity.position.y,
+                this.bot.entity.position.z,
+
+                0,
+                0,
+                0,
+
+                this.bot.health
+            ]
+        }
+
         return [ 
             this.bot.entity.position.x,
             this.bot.entity.position.y,
@@ -114,7 +128,7 @@ exports.MCBot = class {
             e.type === "player" || 
             e.type === "hostile" )
             
-            if (nearestEntity) {
+            if (nearestEntity && nearestEntity !== null) {
                 await this.bot.lookAt(nearestEntity.position.offset(0, nearestEntity.height, 0))
                 this.bot.attack(nearestEntity)
             }
