@@ -1,11 +1,14 @@
 const mineflayer = require("mineflayer")
+const { NN } = require("./nn")
 
 exports.MCBot = class {
-    constructor(id, gen, unique, port) {
+    constructor(id, gen, unique, port, brain, explorationRate) {
         this.id = id
         this.gen = gen
         this.unique = unique
         this.name = `GEN${gen}ID${id}_${unique}`
+        this.brain = brain
+        this.explorationRate = explorationRate
 
         this.bot = mineflayer.createBot({
             host: "localhost",
@@ -62,6 +65,23 @@ exports.MCBot = class {
 
             this.bot.health
         ]
+    }
+
+    async brainAction() {
+
+        if (Math.floor(Math.random()*2) <= this.explorationRate) {
+            // Explore
+            const randAction = Math.floor(Math.random() * 8)
+            await this.botAction(randAction)
+        }
+        else {
+            // Exploit
+            const outputs = NN.feedForward(this.brain, this.getObservations())
+            const actionId = outputs.indexOf(Math.max(...outputs))
+            await this.botAction(actionId)
+        }
+
+        
     }
 
     async botAction(actionId) {

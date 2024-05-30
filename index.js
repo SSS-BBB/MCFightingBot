@@ -1,6 +1,7 @@
 const mineflayer = require("mineflayer")
 const fs = require("fs")
 const { MCBot } = require("./mcBot")
+const { NN } = require("./nn")
 
 const PORT = 55624
 const UNIQUE_PATH = "uniques.json"
@@ -106,8 +107,11 @@ controlBot.on("chat", async (username, message) => {
             for (let step = 0; step < maxSteps; step++) {
                 allBots.forEach(async (botClass) => {
                     // Random action
-                    const randAction = Math.floor(Math.random() * 8)
-                    botClass.botAction(randAction)
+                    // const randAction = Math.floor(Math.random() * 8)
+                    // botClass.botAction(randAction)
+
+                    // Brain action
+                    botClass.brainAction()
                 })
                 await controlBot.waitForTicks(1)
             }
@@ -124,13 +128,51 @@ controlBot.on("chat", async (username, message) => {
         }
         
     }
+
+    if (message.toLowerCase() === "start evo") {
+        const lastGen = 5
+        const population = 5
+        const maxSteps = 500
+
+        for (let gen = 1; gen <= lastGen; gen++) {
+            removeAllBots()
+            createBots(population, gen)
+
+            while (countReady() < population) {
+                await controlBot.waitForTicks(1)
+            }
+
+            for (let step = 0; step < maxSteps; step++) {
+                allBots.forEach(async (botClass) => {
+                    // Random action
+                    // const randAction = Math.floor(Math.random() * 8)
+                    // botClass.botAction(randAction)
+
+                    // Brain action
+                    botClass.brainAction()
+                })
+                await controlBot.waitForTicks(1)
+            }
+
+            // Only keep the random
+            const randKeep = allBots[Math.floor(Math.random() * allBots.length)]
+            allBots.forEach((botClass) => {
+                if ((botClass.id) !== randKeep.id) {
+                    botClass.bot.quit()
+                }
+            })
+            allBots = allBots.filter((botClass) => botClass.id === randKeep.id)
+            console.log(allBots[0].name)
+    }
+ }
+
 })
 
 function createBots(amount, gen) {
     id = 1
     
     let unique = generateUnique(5)
-    console.log(uniqueList)
+    // console.log(uniqueList)
     while (uniqueList.includes(unique)) {
         unique = generateUnique(5)
     }
@@ -142,10 +184,62 @@ function createBots(amount, gen) {
         
     }
 
+    const layerSizeList = [7, 5, 3, 2, 8]
     for (let i = 0; i < amount; i++) {
 
         // Create new bot
-        const botClass = new MCBot(id, gen, unique, PORT)
+        const botClass = new MCBot(id, gen, unique, PORT, new NN(layerSizeList), 0.2)
+        
+        // Add bot to list
+        allBots.push(botClass)
+
+        // Remove when bot is dead
+        botClass.bot.once("respawn", () => {
+            removeBotByID(botClass.id)
+        })
+
+        // Control bot chat
+        controlBot.chat(botClass.name + " Created.")
+
+        id++
+    }
+}
+
+function createMutateBots(amount, gen, brain) {
+    id = 1
+    
+    let unique = generateUnique(5)
+    // console.log(uniqueList)
+    while (uniqueList.includes(unique)) {
+        unique = generateUnique(5)
+    }
+    uniqueList.push(unique)
+
+    try {
+        fs.writeFileSync(UNIQUE_PATH, JSON.stringify(uniqueList))
+    } catch (error) {
+        
+    }
+
+    const layerSizeList = [7, 5, 3, 2, 8]
+    for (let i = 0; i < amount; i++) {
+
+        // Create new bot
+        let newBrain
+        if (brain !== null) {
+            if (i !== 0) {
+                newBrain = NN.mutate(brain, 0.2)
+            }
+            else {
+                newBrain = brain
+            }
+            
+        }
+        else {
+            newBrain = new NN(layerSizeList)
+        }
+        
+        const botClass = new MCBot(id, gen, unique, PORT, newBrain, 0.2)
         
         // Add bot to list
         allBots.push(botClass)
