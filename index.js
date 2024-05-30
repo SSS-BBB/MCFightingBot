@@ -1,10 +1,17 @@
 const mineflayer = require("mineflayer")
+const fs = require("fs")
 const { MCBot } = require("./mcBot")
 
-const PORT = 55296
+const PORT = 55624
+const UNIQUE_PATH = "uniques.json"
 
 let id = 1
 let allBots = []
+let uniqueList = []
+
+if (fs.existsSync(UNIQUE_PATH)) {
+    uniqueList = JSON.parse(fs.readFileSync(UNIQUE_PATH, "utf-8"))
+}
 
 const controlBot = mineflayer.createBot({
     host: "localhost",
@@ -121,10 +128,24 @@ controlBot.on("chat", async (username, message) => {
 
 function createBots(amount, gen) {
     id = 1
+    
+    let unique = generateUnique(5)
+    console.log(uniqueList)
+    while (uniqueList.includes(unique)) {
+        unique = generateUnique(5)
+    }
+    uniqueList.push(unique)
+
+    try {
+        fs.writeFileSync(UNIQUE_PATH, JSON.stringify(uniqueList))
+    } catch (error) {
+        
+    }
+
     for (let i = 0; i < amount; i++) {
 
         // Create new bot
-        const botClass = new MCBot(id, gen, PORT)
+        const botClass = new MCBot(id, gen, unique, PORT)
         
         // Add bot to list
         allBots.push(botClass)
@@ -146,7 +167,7 @@ function getBotFromID(id) {
     const botClass = allBots.find( (b) => b.id === id )
 
     if (!botClass) {
-        controlBot.chat(`${botName} not found.`)
+        controlBot.chat(`${id} not found.`)
         return false
     }
 
@@ -213,4 +234,13 @@ function setBotToArenaByClass(botClass) {
 
 function countReady() {
     return allBots.filter((botClass) => botClass.botReady).length
+}
+
+function generateUnique(uniqueLen) {
+    const value = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_"
+    let uniqueValue = ""
+    for (let i = 0; i < uniqueLen; i++) {
+        uniqueValue += value[Math.floor(Math.random() * value.length)]
+    }
+    return uniqueValue
 }

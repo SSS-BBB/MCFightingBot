@@ -1,9 +1,11 @@
 const mineflayer = require("mineflayer")
 
 exports.MCBot = class {
-    constructor(id, gen, port) {
+    constructor(id, gen, unique, port) {
         this.id = id
-        this.name = `GEN_${gen}_ID_${id}`
+        this.gen = gen
+        this.unique = unique
+        this.name = `GEN${gen}ID${id}_${unique}`
 
         this.bot = mineflayer.createBot({
             host: "localhost",
