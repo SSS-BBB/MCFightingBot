@@ -1,12 +1,31 @@
 const { lerp } = require("./utils")
 
+const minRand = -1
+const maxRand = 1
+
 class NeuralActivation {
     static relu = function(x) {
         return Math.max(0, x)
     }
 
+    static parametricRelu = function(x) {
+        if (x >= 0) {
+            return x
+        }
+
+        return 0.01 * x
+    }
+
+    static sigmoid = function(x) {
+        return 1 / (1 + Math.pow(Math.E, -x))
+    }
+
     static identity = function(x) {
         return x
+    }
+
+    static gaussian = function(x) {
+        return Math.pow(Math.E, -Math.pow(x, 2))
     }
 }
 
@@ -18,10 +37,8 @@ class NerualNode {
         this.bias = bias
 
         this.weights = []
-        this.minWeight = -1
-        this.maxWeight = 1
         for (let i = 0; i < nextLayerSize; i++) {
-            const randWeight = Math.random()*2-1
+            const randWeight = Math.random()*(maxRand - minRand) + minRand
             this.weights.push(randWeight) // some random value
         }
     }
@@ -67,7 +84,7 @@ class NerualLayer {
                 this.nodeList.push(new NerualNode(nextLayerSize, 0))
             }
             else {
-                const randBias = Math.random()*2-1
+                const randBias = Math.random()*(maxRand - minRand) + minRand
                 this.nodeList.push(new NerualNode(nextLayerSize, randBias))
             }
         }
@@ -85,7 +102,7 @@ class NerualLayer {
                 nodeSum += NerualNode.nodeConnect(prevNode, i)
             })
             // layerList.nodeList[i].setNodeValue(nodeSum, NeuralActivation.relu)
-            NerualNode.setNodeValue(layerList.nodeList[i], nodeSum, NeuralActivation.relu)
+            NerualNode.setNodeValue(layerList.nodeList[i], nodeSum, NeuralActivation.identity)
             // console.log(layerList.nodeList[i])
         }
     }

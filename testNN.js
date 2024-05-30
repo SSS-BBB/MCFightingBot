@@ -12,10 +12,10 @@ class NNTest {
     }
 }
 
-let brain = new NN([5, 4, 3, 5])
+let brain = new NN([5, 10, 1, 5])
 
 const values1 = [1, 10, 100, 8, 9]
-const values2 = [1, 2, 3, 6, 9]
+const values2 = [10, 11, 120, 10, 7]
 
 // Old brain
 console.log("=====Old brain=====")

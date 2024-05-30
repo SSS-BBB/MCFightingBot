@@ -83,14 +83,16 @@ exports.MCBot = class {
 
     async brainAction() {
 
-        if (Math.floor(Math.random()*2) <= this.explorationRate) {
+        if (Math.random() <= this.explorationRate) {
             // Explore
             const randAction = Math.floor(Math.random() * 8)
             await this.botAction(randAction)
         }
         else {
             // Exploit
+            // this.bot.chat("Exploit!")
             const outputs = NN.feedForward(this.brain, this.getObservations())
+            console.log(outputs)
             const actionId = outputs.indexOf(Math.max(...outputs))
             await this.botAction(actionId)
         }

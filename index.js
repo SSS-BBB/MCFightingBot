@@ -3,7 +3,7 @@ const fs = require("fs")
 const { MCBot } = require("./mcBot")
 const { NN } = require("./nn")
 
-const PORT = 55624
+const PORT = 55330
 const UNIQUE_PATH = "uniques.json"
 
 let id = 1
@@ -177,7 +177,7 @@ controlBot.on("chat", async (username, message) => {
 
                 // Save brain
                 try {
-                    const brainDir = `./models/${evoTime}/${gen}`
+                    const brainDir = `./models/${evoTime}`
                     if (!fs.existsSync(brainDir)) {
                         fs.mkdirSync(brainDir, { recursive: true })
                     }
@@ -196,14 +196,15 @@ controlBot.on("chat", async (username, message) => {
     if (message.toLowerCase() === "load") {
         controlBot.chat("Loading Bot...")
         // load bot
-        const brainDir = "models/1717075366470"
+        const brainDir = "models/1717088569478"
         removeAllBots()
-        loadBot(`${brainDir}/1/GEN1ID4_GAEPY.json`, 4, 1)
-        loadBot(`${brainDir}/5/GEN5ID3_OHdwW.json`, 3, 5)
+        loadBot(`${brainDir}/1/GEN1ID5_aRpIm.json`, 5, 1)
+        // loadBot(`${brainDir}/5/GEN5ID4_dA4UJ.json`, 4, 5)
+        // loadBot(`${brainDir}/10/GEN10ID2_ZAHcM.json`, 2, 10)
 
         const maxSteps = 500
 
-        while (countReady() < 2) {
+        while (countReady() < allBots.length) {
             await controlBot.waitForTicks(1)
         }
 
@@ -233,11 +234,11 @@ function createBots(amount, gen) {
         console.log(error)
     }
 
-    const layerSizeList = [7, 5, 3, 2, 8]
+    const layerSizeList = [7, 5, 8]
     for (let i = 0; i < amount; i++) {
 
         // Create new bot
-        const botClass = new MCBot(id, gen, unique, PORT, new NN(layerSizeList), 0.2)
+        const botClass = new MCBot(id, gen, unique, PORT, new NN(layerSizeList), 0)
         
         // Add bot to list
         allBots.push(botClass)
@@ -308,7 +309,7 @@ function createMutateBots(amount, gen, brain, mutationRate) {
         
     }
 
-    const layerSizeList = [7, 5, 3, 2, 8]
+    const layerSizeList = [7, 5, 8]
     for (let i = 0; i < amount; i++) {
 
         // Create new bot
@@ -326,7 +327,7 @@ function createMutateBots(amount, gen, brain, mutationRate) {
             newBrain = new NN(layerSizeList)
         }
         
-        const botClass = new MCBot(id, gen, unique, PORT, newBrain, 0.2)
+        const botClass = new MCBot(id, gen, unique, PORT, newBrain, 0)
         
         // Add bot to list
         allBots.push(botClass)
