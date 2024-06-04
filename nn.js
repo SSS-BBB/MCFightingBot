@@ -102,7 +102,12 @@ class NerualLayer {
                 nodeSum += NerualNode.nodeConnect(prevNode, i)
             })
             // layerList.nodeList[i].setNodeValue(nodeSum, NeuralActivation.relu)
-            NerualNode.setNodeValue(layerList.nodeList[i], nodeSum, NeuralActivation.identity)
+            if (layerList.nextLayerSize !== 0) {
+                NerualNode.setNodeValue(layerList.nodeList[i], nodeSum, NeuralActivation.relu)
+            }
+            else {
+                NerualNode.setNodeValue(layerList.nodeList[i], nodeSum)
+            }
             // console.log(layerList.nodeList[i])
         }
     }

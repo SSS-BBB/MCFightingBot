@@ -20,6 +20,8 @@ exports.MCBot = class {
         this.survivalTime = 0
         this.bot.health = 20
         this.botReady = false
+        this.actionSize = 8
+        this.prevAction = -1
 
         this.bot.once("spawn", this.setBotToArena.bind(this))
     }
@@ -64,7 +66,9 @@ exports.MCBot = class {
                 0,
                 0,
 
-                this.bot.health
+                this.bot.health,
+
+                ...this.oneHot(this.prevAction, this.actionSize)
             ]
         }
 
@@ -77,8 +81,23 @@ exports.MCBot = class {
             nearestEntity.position.y,
             nearestEntity.position.z,
 
-            this.bot.health
+            this.bot.health,
+
+            ...this.oneHot(this.prevAction, this.actionSize)
         ]
+    }
+
+    oneHot(data, classes_size) {
+        const oneHotList = []
+        for (let i = 0; i < classes_size; i++) {
+            if (i === data) {
+                oneHotList.push(1)
+            }
+            else {
+                oneHotList.push(0)
+            }
+        }
+        return oneHotList
     }
 
     async brainAction() {
@@ -92,7 +111,7 @@ exports.MCBot = class {
             // Exploit
             // this.bot.chat("Exploit!")
             const outputs = NN.feedForward(this.brain, this.getObservations())
-            console.log(outputs)
+            console.log(this.getObservations())
             const actionId = outputs.indexOf(Math.max(...outputs))
             await this.botAction(actionId)
         }
@@ -106,8 +125,7 @@ exports.MCBot = class {
         }
 
         // 0 -> forward, 1 -> back, 2 -> left, 3 -> right, 4 -> jump, 5 -> sprint, 6 -> sneak, 7 -> hit
-        const actionSize = 8
-        if (actionId + 1 > actionSize) {
+        if (actionId + 1 > this.actionSize) {
             this.bot.chat(`No ${actionId} action.`)
             return false
         }
@@ -136,5 +154,7 @@ exports.MCBot = class {
             }
             // this.bot.chat("Hit!")
         }
+
+        this.prevAction = actionId
     }
 }

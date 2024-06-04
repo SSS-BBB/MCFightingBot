@@ -3,8 +3,9 @@ const fs = require("fs")
 const { MCBot } = require("./mcBot")
 const { NN } = require("./nn")
 
-const PORT = 55330
+const PORT = 56193
 const UNIQUE_PATH = "uniques.json"
+const layerSizeList = [15, 5, 8]
 
 let id = 1
 let allBots = []
@@ -234,7 +235,6 @@ function createBots(amount, gen) {
         console.log(error)
     }
 
-    const layerSizeList = [7, 5, 8]
     for (let i = 0; i < amount; i++) {
 
         // Create new bot
@@ -309,7 +309,6 @@ function createMutateBots(amount, gen, brain, mutationRate) {
         
     }
 
-    const layerSizeList = [7, 5, 8]
     for (let i = 0; i < amount; i++) {
 
         // Create new bot
